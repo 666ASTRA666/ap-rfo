@@ -165,7 +165,14 @@ function render() {
     content.innerHTML = heading("Руководство палаты","Органы управления и ответственные лица") +
       cards(data.lawyers.filter(x => /председател|заместител|руководител/i.test(x.role || "")), "♙");
   }
-  if (page === "lawyers") content.innerHTML = heading("Реестр адвокатов","Список лиц, имеющих действующий игровой статус") + rows(data.lawyers,"lawyers");
+ if (page === "lawyers") {
+  content.innerHTML = heading("Реестр адвокатов","Официальный реестр адвокатской палаты") +
+    `<div class="card">
+      <h3>Реестр адвокатов РФО</h3>
+      <p>Ознакомиться с актуальным списком адвокатов можно в официальном реестре.</p>
+      <a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a>
+    </div>`;
+}
   if (page === "departments") content.innerHTML = heading("Структура и подразделения","Организация внутренней работы палаты") + cards(data.departments,"▦");
   if (page === "documents") content.innerHTML = heading("Документы","Нормативные и внутренние документы палаты") + rows(data.documents,"documents");
   if (page === "news") content.innerHTML = heading("Новости и объявления","Официальные публикации палаты") + rows(data.news,"news");
