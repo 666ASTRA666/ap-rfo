@@ -79,6 +79,300 @@ function configured() {
     SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_");
 }
 function showConfigWarning() {
+  if (!window.supabase) {
+    content.innerHTML = `<div class="notice"><b>Не удалось загрузить библиотеку Supabase.</b><br>
+      Обновите страницу. Если ошибка повторяется, проверьте подключение к интернету и доступность CDN.</div>`;
+    return true;
+  }
+  if (!configured()) {
+    content.innerHTML = `<div class="notice"><b>Подключение базы данных ещё не настроено.</b><br>
+      Проверьте URL проекта и Publishable key в настройках сайта.</div>`;
+    return true;
+  }
+  return false;
+}
+async function init() {
+  if (showConfigWarning()) return;
+  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+  const { data: authData } = await sbClient.auth.getSession();
+  currentUser = authData?.session?.user || null;
+  if (currentUser) await checkStaff();
+  await loadData();
+  sbClient.auth.onAuthStateChange(async (_event, session) => {
+    currentUser = session?.user || null;
+    logged = false;
+    if (currentUser) await checkStaff();
+    if (page === "admin") render();
+  });
+}
+async function checkStaff() {
+  if (!currentUser) { logged = false; return; }
+  const { data: roles, error } = await sbClient
+    .from("user_roles").select("role").eq("user_id", currentUser.id);
+  logged = !error && Array.isArray(roles) &&
+    roles.some(x => x.role === "admin" || x.role === "editor");
+}
+async function loadData() {
+  if (!sbClient) return;
+  const specs = [
+    ["lawyers", "id,full_name,position,department,status,description,created_at"],
+    ["departments", "id,name,description,published,created_at"],
+    ["documents", "id,title,category,file_url,description,published,created_at"],
+    ["news", "id,title,content,published,created_at"]
+  ];
+  for (const [table, fields] of specs) {
+    const { data: rows, error } = await sbClient.from(table).select(fields).order("created_at", {ascending:false});
+    if (!error && rows) data[table] = rows.map(row => {
+      if (table === "lawyers") return {...row, name:row.full_name, role:row.position, desc:row.description};
+      if (table === "departments") return {...row, desc:row.description};
+      if (table === "documents") return {...row, kind:row.category, desc:row.description};
+      return {...row, date:row.created_at ? new Date(row.created_at).toLocaleDateString("ru-RU") : "", desc:row.content};
+    });
+  }
+  render();
+}
+function heading(title, sub) {
+  return `<div class="section-head"><div><h2>${title}</h2><p class="sub">${sub || ""}</p></div></div>`;
+}
+function cards(items, icon) {
+  if (!items.length) return `<div class="empty">Пока нет опубликованных записей.</div>`;
+  return `<div class="grid">${items.map(x => `<article class="card"><div class="symbol">${icon}</div><h3>${esc(x.name || x.title)}</h3><p>${esc(x.role || x.desc || x.kind || "")}</p></article>`).join("")}</div>`;
+}
+function rows(items, type) {
+  if (!items.length) return `<div class="empty">Пока нет опубликованных записей.</div>`;
+  return `<div class="list">${items.map((x,i) => `<div class="list-item"><div><b>${esc(x.title || x.name)}</b><div class="sub">${esc(x.role || x.kind || x.date || x.category || "")}</div><div>${esc(x.desc || "")}</div>${x.file_url ? `<p><a href="${esc(x.file_url)}" target="_blank" rel="noopener">Открыть документ</a></p>` : ""}</div>${logged && x.id ? `<button class="outline" onclick="removeItem('${type}','${x.id}')">Удалить</button>` : ""}</div>`).join("")}</div>`;
+}
+function show(p) {
+  page = p;
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.page === p));
+  hero.classList.toggle("hidden", p !== "home");
+  render();
+}
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => show(b.dataset.page));
+
+function render() {
+  if (page === "home") {
+    content.innerHTML = `${heading("Добро пожаловать","Официальная информация палаты")}
+      <div class="grid">
+        <div class="card"><div class="symbol">⚖</div><h3>Защита и представительство</h3><p>Оказание правовой помощи участникам игрового процесса.</p></div>
+        <div class="card"><div class="symbol">§</div><h3>Нормативная база</h3><p>Внутренние документы, положения и опубликованные правила.</p></div>
+        <div class="card"><div class="symbol">♙</div><h3>Реестр адвокатов</h3><p>Информация о составе и статусе адвокатского сообщества.</p></div>
+      </div>
+      <div class="notice"><b>Официальное уведомление</b><br>Портал содержит игровую информацию Адвокатской палаты РФО.</div>
+      ${heading("Последние новости","Объявления и события")}${rows(data.news.slice(0,3),"news")}`;
+  }
+  if (page === "leadership") {
+    content.innerHTML = heading("Руководство палаты","Органы управления и ответственные лица") +
+      cards(data.lawyers.filter(x => /председател|заместител|руководител/i.test(x.role || "")), "♙");
+  }
+  if (page === "lawyers") content.innerHTML = heading("Реестр адвокатов","Список лиц, имеющих действующий игровой статус") + rows(data.lawyers,"lawyers");
+  if (page === "departments") content.innerHTML = heading("Структура и подразделения","Организация внутренней работы палаты") + cards(data.departments,"▦");
+  if (page === "documents") content.innerHTML = heading("Документы","Нормативные и внутренние документы палаты") + rows(data.documents,"documents");
+  if (page === "news") content.innerHTML = heading("Новости и объявления","Официальные публикации палаты") + rows(data.news,"news");
+  if (page === "contact") {
+    content.innerHTML = heading("Обращения граждан","Форма для направления обращения в игровую организацию") +
+      `<div class="card"><form onsubmit="sendAppeal(event)">
+        <label>Ваше игровое имя</label><input required id="aName" placeholder="Имя Фамилия">
+        <label>Электронная почта</label><input id="aEmail" type="email" required placeholder="example@mail.com">
+        <label>Тема обращения</label><input required id="aSubject" placeholder="Краткая тема">
+        <label>Текст обращения</label><textarea required id="aText" placeholder="Опишите суть обращения"></textarea>
+        <button class="primary">Отправить обращение</button>
+        <p class="sub">Обращение будет сохранено в базе данных палаты.</p>
+      </form><div id="appealResult"></div></div>`;
+  }
+  if (page === "admin") admin();
+}
+function admin() {
+  if (!currentUser) {
+    content.innerHTML = heading("Административная панель","Вход для уполномоченных сотрудников") +
+      `<div class="card" style="max-width:440px"><h3>Вход администратора</h3>
+      <form onsubmit="login(event)"><label>Email</label><input id="loginEmail" type="email" required placeholder="Адрес электронной почты">
+      <label>Пароль</label><input id="loginPassword" type="password" required placeholder="Пароль Supabase">
+      <button class="primary">Войти</button></form><p class="sub">Используйте пользователя, созданного в Supabase → Authentication → Users.</p></div>`;
+    return;
+  }
+  if (!logged) {
+    content.innerHTML = heading("Доступ не предоставлен","Пользователь вошёл, но не имеет роли администратора.") +
+      `<div class="notice">Добавьте роль <b>admin</b> для этого пользователя в таблице <b>user_roles</b> в Supabase.</div>
+      <button class="outline" onclick="logout()">Выйти</button>`;
+    return;
+  }
+  content.innerHTML = heading("Административная панель","Управление содержимым публичного портала") +
+    `<div class="adminbar"><b>Вы вошли как ${esc(currentUser.email || "администратор")}</b><button class="outline" onclick="logout()">Выйти</button></div>
+    <div class="grid">
+      <div class="card"><h3>Добавить адвоката</h3><form onsubmit="add(event,'lawyers')">
+        <label>Имя и фамилия</label><input id="f0" required><label>Должность</label><input id="f1" required>
+        <label>Подразделение</label><input id="f2"><label>Статус</label><input id="f3" value="Действующий адвокат">
+        <label>Примечание</label><input id="f4"><button class="primary">Добавить</button></form></div>
+      <div class="card"><h3>Добавить документ</h3><form onsubmit="add(event,'documents')">
+        <label>Название</label><input id="f0" required><label>Категория</label><input id="f1">
+        <label>Ссылка на файл (необязательно)</label><input id="f2" type="url"><label>Описание</label><input id="f3">
+        <button class="primary">Добавить</button></form></div>
+      <div class="card"><h3>Добавить новость</h3><form onsubmit="add(event,'news')">
+        <label>Заголовок</label><input id="f0" required><label>Текст новости</label><textarea id="f1" required></textarea>
+        <button class="primary">Опубликовать</button></form></div>
+      <div class="card"><h3>Добавить подразделение</h3><form onsubmit="add(event,'departments')">
+        <label>Название</label><input id="f0" required><label>Описание</label><textarea id="f1"></textarea>
+        <button class="primary">Добавить</button></form></div>
+    </div>
+    <div class="notice"><b>Вход защищён Supabase Auth.</b> Изменения сохраняются в общей базе данных. Доступ к операциям контролируется политиками RLS.</div>
+    <h3>Последние обращения граждан</h3><div id="appealsList" class="list">Загрузка…</div>`;
+  loadAppeals();
+}
+async function login(e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+  const { error } = await sbClient.auth.signInWithPassword({email,password});
+  if (error) { alert("Не удалось войти: " + error.message); return; }
+  const { data: u } = await sbClient.auth.getUser();
+  currentUser = u.user;
+  await checkStaff();
+  render();
+}
+async function logout() {
+  await sbClient.auth.signOut();
+  currentUser = null; logged = false; render();
+}
+async function add(e,type) {
+  e.preventDefault();
+  const form = e.currentTarget;
+  const fields = [...form.querySelectorAll("input, textarea, select")];
+  const v = index => fields[index]?.value?.trim() || "";
+  let obj;
+  if (type === "lawyers") obj = {full_name:v(0),position:v(1),department:v(2),status:v(3) || "Действующий адвокат",description:v(4)};
+  if (type === "documents") obj = {title:v(0),category:v(1),file_url:v(2) || null,description:v(3),published:true};
+  if (type === "news") obj = {title:v(0),content:v(1),published:true};
+  if (type === "departments") obj = {name:v(0),description:v(1),published:true};
+  const { error } = await sbClient.from(type).insert(obj);
+  if (error) { alert("Ошибка сохранения: " + error.message); return; }
+  e.target.reset();
+  await loadData();
+  if (page === "admin") admin();
+}
+async function removeItem(type,id) {
+  if (!confirm("Удалить запись?")) return;
+  const { error } = await sbClient.from(type).delete().eq("id",id);
+  if (error) { alert("Ошибка удаления: " + error.message); return; }
+  await loadData();
+}
+async function sendAppeal(e) {
+  e.preventDefault();
+  const payload = {
+    full_name:document.getElementById("aName").value.trim(),
+    email:document.getElementById("aEmail").value.trim() || null,
+    subject:document.getElementById("aSubject").value.trim(),
+    message:document.getElementById("aText").value.trim(),
+    status:"new"
+  };
+  const { error } = await sbClient.from("appeals").insert(payload);
+  const result = document.getElementById("appealResult");
+  if (error) {
+    result.innerHTML = `<div class="notice">Не удалось отправить обращение: ${esc(error.message)}</div>`;
+    return;
+  }
+  e.target.reset();
+  result.innerHTML = `<div class="notice"><b>Обращение принято.</b><br>Оно сохранено в базе данных Адвокатской палаты РФО.</div>`;
+}
+async function loadAppeals() {
+  const target = document.getElementById("appealsList");
+  if (!target || !logged) return;
+  const { data: items, error } = await sbClient.from("appeals")
+    .select("id,full_name,email,subject,message,status,created_at")
+    .order("created_at",{ascending:false}).limit(30);
+  if (error) { target.innerHTML = `<div class="notice">Не удалось загрузить обращения: ${esc(error.message)}</div>`; return; }
+  if (!items?.length) { target.innerHTML = `<div class="empty">Обращений пока нет.</div>`; return; }
+  target.innerHTML = items.map(a => `<div class="list-item"><div><b>${esc(a.subject)}</b>
+    <div class="sub">${esc(a.full_name)} · ${esc(a.email || "Без email")} · ${esc(a.status)}</div>
+    <p>${esc(a.message)}</p></div></div>`).join("");
+}
+init().catch(err => {
+  console.error(err);
+  content.innerHTML = `<div class="notice"><b>Не удалось подключить сайт к Supabase.</b><br>${esc(err?.message || "Проверьте настройки подключения и обновите страницу.")}</div>`;
+});
+
+</script>
+</body></html><!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Адвокатская палата РФО — RMRP</title>
+<style>
+:root{--navy:#10233b;--navy2:#183653;--gold:#c9aa68;--ink:#1e2936;--muted:#657386;--paper:#f4f6f8;--line:#dce2e8;--white:#fff}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}
+header{background:linear-gradient(120deg,#0c1b2e,#1b3a59);color:#fff;border-bottom:4px solid var(--gold)}
+.wrap{width:min(1120px,92%);margin:auto}.top{display:flex;align-items:center;gap:16px;padding:22px 0}
+.crest{width:58px;height:58px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-size:27px;flex:none}
+.brand b{display:block;letter-spacing:1.2px;font-size:17px}.brand span{color:#d9c79f;font-size:12px;letter-spacing:1px}
+nav{display:flex;gap:5px;flex-wrap:wrap;padding:0 0 16px}
+nav button,.btn{border:1px solid transparent;background:transparent;color:#e9eef4;padding:10px 13px;border-radius:4px;cursor:pointer;font-size:14px}
+nav button:hover,nav button.active{background:#ffffff18;border-color:#ffffff35;color:#fff}
+.hero{background:linear-gradient(90deg,#10233bee,#10233b9c),radial-gradient(circle at 80% 30%,#526b80,#10233b);color:white;padding:56px 0}
+.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:bold}
+h1{font-family:Georgia,serif;font-size:clamp(30px,5vw,48px);line-height:1.15;margin:12px 0}
+.hero p{max-width:650px;color:#dbe3ec;font-size:17px}
+.goldline{width:76px;height:3px;background:var(--gold);margin:22px 0}
+main{padding:34px 0 60px;min-height:55vh}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px}
+h2{font-family:Georgia,serif;color:var(--navy);font-size:27px;margin:0 0 5px}.sub{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:20px;box-shadow:0 3px 12px #172b3d08}
+.card h3{color:var(--navy);margin:0 0 8px;font-size:17px}.card p{color:var(--muted);margin:0}
+.symbol{width:42px;height:42px;border-radius:5px;background:#f3eee3;color:#96783e;display:grid;place-items:center;font-size:20px;margin-bottom:13px}
+.notice{border-left:3px solid var(--gold);background:#fff;padding:17px 20px;margin:18px 0;border-radius:0 6px 6px 0}
+.list{display:grid;gap:10px}.list-item{background:#fff;border:1px solid var(--line);padding:15px 18px;border-radius:6px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+.tag{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:#80652f;background:#f5f0e5;padding:4px 8px;border-radius:3px;white-space:nowrap}
+footer{background:#0c1b2e;color:#c5ced8;padding:28px 0;font-size:13px}footer strong{color:#fff}
+button.primary,.primary{background:var(--navy2);color:#fff;border:0;padding:11px 16px;border-radius:4px;cursor:pointer}
+button.primary:hover{background:#244c70}button.outline{background:#fff;border:1px solid var(--line);color:var(--navy);padding:9px 13px;border-radius:4px;cursor:pointer}
+input,textarea,select{width:100%;padding:11px;border:1px solid #cbd4dd;border-radius:4px;font:inherit;margin:5px 0 12px;background:white}
+label{font-size:13px;font-weight:bold;color:#344357}textarea{min-height:100px;resize:vertical}
+.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}
+.adminbar{background:#e9eef3;border:1px solid #d2dbe4;padding:14px;border-radius:6px;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.empty{padding:30px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #cbd4dd;border-radius:6px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.formrow{grid-template-columns:1fr}.hero{padding:42px 0}.section-head{align-items:flex-start;flex-direction:column}.list-item{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header>
+ <div class="wrap">
+  <div class="top"><div class="crest">⚖</div><div class="brand"><b>АДВОКАТСКАЯ ПАЛАТА РФО</b><span>РУБЛЕВСКИЙ ФЕДЕРАЛЬНЫЙ ОКРУГ · RMRP</span></div></div>
+  <nav id="nav">
+   <button class="active" data-page="home">Главная</button><button data-page="leadership">Руководство</button><button data-page="lawyers">Реестр адвокатов</button><button data-page="departments">Подразделения</button><button data-page="documents">Документы</button><button data-page="news">Новости</button><button data-page="contact">Обращения</button><button data-page="admin">Админ-панель</button>
+  </nav>
+ </div>
+</header>
+<section class="hero" id="hero"><div class="wrap"><div class="eyebrow">Официальный информационный портал</div><h1>Законность.<br>Справедливость. Защита.</h1><div class="goldline"></div><p>Профессиональная юридическая помощь, защита прав и законных интересов граждан в рамках игрового мира RMRP.</p></div></section>
+<main class="wrap"><div id="content"></div></main>
+<footer><div class="wrap"><strong>Адвокатская палата Рублевского федерального округа</strong><br>Информационный портал игрового проекта RMRP. Все сведения и документы на сайте являются игровыми.</div></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+
+// 1) ВСТАВЬТЕ СЮДА URL ПРОЕКТА И PUBLISHABLE KEY ИЗ SUPABASE
+const SUPABASE_URL = "https://iokashgaqmbrbyltnawg.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_skptQdKqe5bGoK7m4lsJJQ_5LnzWyUe";
+
+const defaults = {
+  lawyers: [], departments: [], documents: [], news: []
+};
+let data = {...defaults};
+let page = "home";
+let logged = false;
+let currentUser = null;
+let sbClient = null;
+const content = document.getElementById("content");
+const hero = document.getElementById("hero");
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+  }[c]));
+}
+function configured() {
+  return window.supabase && SUPABASE_URL.startsWith("https://") &&
+    SUPABASE_PUBLISHABLE_KEY.startsWith("sb_publishable_");
+}
+function showConfigWarning() {
   if (!configured()) {
     content.innerHTML = `<div class="notice"><b>Подключение базы данных ещё не настроено.</b><br>
       В файле index.html замените значение SUPABASE_PUBLISHABLE_KEY на свой Publishable key из Supabase, затем загрузите сайт в Vercel повторно.</div>`;
