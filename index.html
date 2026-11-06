@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -6,37 +6,48 @@
 <title>Адвокатская палата РФО — RMRP</title>
 <style>
 :root{--navy:#10233b;--navy2:#183653;--gold:#c9aa68;--ink:#1e2936;--muted:#657386;--paper:#f4f6f8;--line:#dce2e8;--white:#fff}
-*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper);line-height:1.55}
 header{background:linear-gradient(120deg,#0c1b2e,#1b3a59);color:#fff;border-bottom:4px solid var(--gold)}
-.wrap{width:min(1120px,92%);margin:auto}.top{display:flex;align-items:center;gap:16px;padding:22px 0}
+.wrap{width:min(1120px,92%);margin:auto}
+.top{display:flex;align-items:center;gap:16px;padding:22px 0}
 .crest{width:58px;height:58px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-size:27px;flex:none}
-.brand b{display:block;letter-spacing:1.2px;font-size:17px}.brand span{color:#d9c79f;font-size:12px;letter-spacing:1px}
+.brand b{display:block;letter-spacing:1.2px;font-size:17px}
+.brand span{color:#d9c79f;font-size:12px;letter-spacing:1px}
 nav{display:flex;gap:5px;flex-wrap:wrap;padding:0 0 16px}
-nav button,.btn{border:1px solid transparent;background:transparent;color:#e9eef4;padding:10px 13px;border-radius:4px;cursor:pointer;font-size:14px}
-nav button:hover,nav button.active{background:#ffffff18;border-color:#ffffff35;color:#fff}
+nav button,nav a,.btn{border:1px solid transparent;background:transparent;color:#e9eef4;padding:10px 13px;border-radius:4px;cursor:pointer;font-size:14px;text-decoration:none;font-family:inherit;display:inline-flex;align-items:center}
+nav button:hover,nav button.active,nav a:hover{background:#ffffff18;border-color:#ffffff35;color:#fff}
 .hero{background:linear-gradient(90deg,#10233bee,#10233b9c),radial-gradient(circle at 80% 30%,#526b80,#10233b);color:white;padding:56px 0}
 .eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:bold}
 h1{font-family:Georgia,serif;font-size:clamp(30px,5vw,48px);line-height:1.15;margin:12px 0}
 .hero p{max-width:650px;color:#dbe3ec;font-size:17px}
 .goldline{width:76px;height:3px;background:var(--gold);margin:22px 0}
-main{padding:34px 0 60px;min-height:55vh}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px}
-h2{font-family:Georgia,serif;color:var(--navy);font-size:27px;margin:0 0 5px}.sub{color:var(--muted);margin:0}
+main{padding:34px 0 60px;min-height:55vh}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px}
+h2{font-family:Georgia,serif;color:var(--navy);font-size:27px;margin:0 0 5px}
+.sub{color:var(--muted);margin:0}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .card{background:#fff;border:1px solid var(--line);border-radius:7px;padding:20px;box-shadow:0 3px 12px #172b3d08}
-.card h3{color:var(--navy);margin:0 0 8px;font-size:17px}.card p{color:var(--muted);margin:0}
+.card h3{color:var(--navy);margin:0 0 8px;font-size:17px}
+.card p{color:var(--muted);margin:0 0 12px}
 .symbol{width:42px;height:42px;border-radius:5px;background:#f3eee3;color:#96783e;display:grid;place-items:center;font-size:20px;margin-bottom:13px}
 .notice{border-left:3px solid var(--gold);background:#fff;padding:17px 20px;margin:18px 0;border-radius:0 6px 6px 0}
-.list{display:grid;gap:10px}.list-item{background:#fff;border:1px solid var(--line);padding:15px 18px;border-radius:6px;display:flex;justify-content:space-between;gap:15px;align-items:center}
+.list{display:grid;gap:10px}
+.list-item{background:#fff;border:1px solid var(--line);padding:15px 18px;border-radius:6px;display:flex;justify-content:space-between;gap:15px;align-items:center}
 .tag{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:#80652f;background:#f5f0e5;padding:4px 8px;border-radius:3px;white-space:nowrap}
-footer{background:#0c1b2e;color:#c5ced8;padding:28px 0;font-size:13px}footer strong{color:#fff}
-button.primary,.primary{background:var(--navy2);color:#fff;border:0;padding:11px 16px;border-radius:4px;cursor:pointer}
-button.primary:hover{background:#244c70}button.outline{background:#fff;border:1px solid var(--line);color:var(--navy);padding:9px 13px;border-radius:4px;cursor:pointer}
+footer{background:#0c1b2e;color:#c5ced8;padding:28px 0;font-size:13px}
+footer strong{color:#fff}
+button.primary,.primary{background:var(--navy2);color:#fff;border:0;padding:11px 16px;border-radius:4px;cursor:pointer;text-decoration:none;display:inline-block}
+button.primary:hover,.primary:hover{background:#244c70}
+button.outline{background:#fff;border:1px solid var(--line);color:var(--navy);padding:9px 13px;border-radius:4px;cursor:pointer}
 input,textarea,select{width:100%;padding:11px;border:1px solid #cbd4dd;border-radius:4px;font:inherit;margin:5px 0 12px;background:white}
-label{font-size:13px;font-weight:bold;color:#344357}textarea{min-height:100px;resize:vertical}
-.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}.hidden{display:none!important}
+label{font-size:13px;font-weight:bold;color:#344357}
+textarea{min-height:100px;resize:vertical}
+.formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hidden{display:none!important}
 .adminbar{background:#e9eef3;border:1px solid #d2dbe4;padding:14px;border-radius:6px;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .empty{padding:30px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #cbd4dd;border-radius:6px}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.formrow{grid-template-columns:1fr}.hero{padding:42px 0}.section-head{align-items:flex-start;flex-direction:column}.list-item{align-items:flex-start;flex-direction:column}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.formrow{grid-template-columns:1fr}.hero{padding:42px 0}.section-head{align-items:flex-start;flex-direction:column}.list-item{align-items:flex-start;flex-direction:column}nav{gap:4px}nav button,nav a{padding:9px 10px}}
 </style>
 </head>
 <body>
@@ -44,7 +55,14 @@ label{font-size:13px;font-weight:bold;color:#344357}textarea{min-height:100px;re
  <div class="wrap">
   <div class="top"><div class="crest">⚖</div><div class="brand"><b>АДВОКАТСКАЯ ПАЛАТА РФО</b><span>РУБЛЕВСКИЙ ФЕДЕРАЛЬНЫЙ ОКРУГ · RMRP</span></div></div>
   <nav id="nav">
-   <button class="active" data-page="home">Главная</button><button data-page="leadership">Руководство</button><button type="button" onclick="window.open('https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517','_blank','noopener')">Реестр адвокатов</button><button data-page="departments">Подразделения</button><button data-page="documents">Документы</button><button data-page="news">Новости</button><button data-page="contact">Обращения</button><button data-page="admin">Админ-панель</button>
+   <button type="button" data-page="home" class="active">Главная</button>
+   <button type="button" data-page="leadership">Руководство</button>
+   <a href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Реестр адвокатов</a>
+   <button type="button" data-page="departments">Подразделения</button>
+   <button type="button" data-page="documents">Документы</button>
+   <button type="button" data-page="news">Новости</button>
+   <button type="button" data-page="contact">Обращения</button>
+   <button type="button" data-page="admin">Админ-панель</button>
   </nav>
  </div>
 </header>
@@ -53,14 +71,10 @@ label{font-size:13px;font-weight:bold;color:#344357}textarea{min-height:100px;re
 <footer><div class="wrap"><strong>Адвокатская палата Рублевского федерального округа</strong><br>Информационный портал игрового проекта RMRP. Все сведения и документы на сайте являются игровыми.</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-
-// 1) ВСТАВЬТЕ СЮДА URL ПРОЕКТА И PUBLISHABLE KEY ИЗ SUPABASE
 const SUPABASE_URL = "https://iokashgaqmbrbyltnawg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_skptQdKqe5bGoK7m4lsJJQ_5LnzWyUe";
 
-const defaults = {
-  lawyers: [], departments: [], documents: [], news: []
-};
+const defaults = {lawyers: [], departments: [], documents: [], news: []};
 let data = {...defaults};
 let page = "home";
 let logged = false;
@@ -80,13 +94,11 @@ function configured() {
 }
 function showConfigWarning() {
   if (!window.supabase) {
-    content.innerHTML = `<div class="notice"><b>Не удалось загрузить библиотеку Supabase.</b><br>
-      Обновите страницу. Если ошибка повторяется, проверьте подключение к интернету и доступность CDN.</div>`;
+    content.innerHTML = `<div class="notice"><b>Не удалось загрузить библиотеку Supabase.</b><br>Обновите страницу. Если ошибка повторяется, проверьте подключение к интернету и доступность CDN.</div>`;
     return true;
   }
   if (!configured()) {
-    content.innerHTML = `<div class="notice"><b>Подключение базы данных ещё не настроено.</b><br>
-      Проверьте URL проекта и Publishable key в настройках сайта.</div>`;
+    content.innerHTML = `<div class="notice"><b>Подключение базы данных ещё не настроено.</b><br>Проверьте URL проекта и Publishable key в настройках сайта.</div>`;
     return true;
   }
   return false;
@@ -94,7 +106,7 @@ function showConfigWarning() {
 async function init() {
   if (showConfigWarning()) return;
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  const { data: authData } = await sbClient.auth.getSession();
+  const {data: authData} = await sbClient.auth.getSession();
   currentUser = authData?.session?.user || null;
   if (currentUser) await checkStaff();
   await loadData();
@@ -106,11 +118,9 @@ async function init() {
   });
 }
 async function checkStaff() {
-  if (!currentUser) { logged = false; return; }
-  const { data: roles, error } = await sbClient
-    .from("user_roles").select("role").eq("user_id", currentUser.id);
-  logged = !error && Array.isArray(roles) &&
-    roles.some(x => x.role === "admin" || x.role === "editor");
+  if (!currentUser) {logged = false; return;}
+  const {data: roles, error} = await sbClient.from("user_roles").select("role").eq("user_id", currentUser.id);
+  logged = !error && Array.isArray(roles) && roles.some(x => x.role === "admin" || x.role === "editor");
 }
 async function loadData() {
   if (!sbClient) return;
@@ -121,7 +131,7 @@ async function loadData() {
     ["news", "id,title,content,published,created_at"]
   ];
   for (const [table, fields] of specs) {
-    const { data: rows, error } = await sbClient.from(table).select(fields).order("created_at", {ascending:false});
+    const {data: rows, error} = await sbClient.from(table).select(fields).order("created_at", {ascending:false});
     if (!error && rows) data[table] = rows.map(row => {
       if (table === "lawyers") return {...row, name:row.full_name, role:row.position, desc:row.description};
       if (table === "departments") return {...row, desc:row.description};
@@ -140,15 +150,17 @@ function cards(items, icon) {
 }
 function rows(items, type) {
   if (!items.length) return `<div class="empty">Пока нет опубликованных записей.</div>`;
-  return `<div class="list">${items.map((x,i) => `<div class="list-item"><div><b>${esc(x.title || x.name)}</b><div class="sub">${esc(x.role || x.kind || x.date || x.category || "")}</div><div>${esc(x.desc || "")}</div>${x.file_url ? `<p><a href="${esc(x.file_url)}" target="_blank" rel="noopener">Открыть документ</a></p>` : ""}</div>${logged && x.id ? `<button class="outline" onclick="removeItem('${type}','${x.id}')">Удалить</button>` : ""}</div>`).join("")}</div>`;
+  return `<div class="list">${items.map(x => `<div class="list-item"><div><b>${esc(x.title || x.name)}</b><div class="sub">${esc(x.role || x.kind || x.date || x.category || "")}</div><div>${esc(x.desc || "")}</div>${x.file_url ? `<p><a href="${esc(x.file_url)}" target="_blank" rel="noopener">Открыть документ</a></p>` : ""}</div>${logged && x.id ? `<button class="outline" onclick="removeItem('${type}','${x.id}')">Удалить</button>` : ""}</div>`).join("")}</div>`;
 }
 function show(p) {
   page = p;
-  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b.dataset.page === p));
+  document.querySelectorAll("#nav button").forEach(b => b.classList.toggle("active", b.dataset.page === p));
   hero.classList.toggle("hidden", p !== "home");
   render();
 }
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => show(b.dataset.page));
+document.querySelectorAll("#nav button[data-page]").forEach(b => {
+  b.addEventListener("click", () => show(b.dataset.page));
+});
 
 function render() {
   if (page === "home") {
@@ -156,7 +168,7 @@ function render() {
       <div class="grid">
         <div class="card"><div class="symbol">⚖</div><h3>Защита и представительство</h3><p>Оказание правовой помощи участникам игрового процесса.</p></div>
         <div class="card"><div class="symbol">§</div><h3>Нормативная база</h3><p>Внутренние документы, положения и опубликованные правила.</p></div>
-        <div class="card"><div class="symbol">♙</div><h3>Реестр адвокатов</h3><p>Информация о составе и статусе адвокатского сообщества.</p></div>
+        <div class="card"><div class="symbol">♙</div><h3>Реестр адвокатов</h3><p>Информация о составе и статусе адвокатского сообщества.</p><a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр</a></div>
       </div>
       <div class="notice"><b>Официальное уведомление</b><br>Портал содержит игровую информацию Адвокатской палаты РФО.</div>
       ${heading("Последние новости","Объявления и события")}${rows(data.news.slice(0,3),"news")}`;
@@ -165,17 +177,14 @@ function render() {
     content.innerHTML = heading("Руководство палаты","Органы управления и ответственные лица") +
       cards(data.lawyers.filter(x => /председател|заместител|руководител/i.test(x.role || "")), "♙");
   }
- if (page === "lawyers") {
-  content.innerHTML = heading("Реестр адвокатов","Официальный реестр адвокатской палаты") +
-    `<div class="card">
-      <h3>Реестр адвокатов РФО</h3>
-      <p>Ознакомиться с актуальным списком адвокатов можно в официальном реестре.</p>
-      <a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a>
-    </div>`;
-}
   if (page === "departments") content.innerHTML = heading("Структура и подразделения","Организация внутренней работы палаты") + cards(data.departments,"▦");
   if (page === "documents") content.innerHTML = heading("Документы","Нормативные и внутренние документы палаты") + rows(data.documents,"documents");
   if (page === "news") content.innerHTML = heading("Новости и объявления","Официальные публикации палаты") + rows(data.news,"news");
+  if (page === "lawyers") {
+    content.innerHTML = heading("Реестр адвокатов","Официальный реестр адвокатской палаты") +
+      `<div class="card"><h3>Реестр адвокатов РФО</h3><p>Актуальный список адвокатов размещён в официальной таблице реестра.</p>
+      <a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a></div>`;
+  }
   if (page === "contact") {
     content.innerHTML = heading("Обращения граждан","Форма для направления обращения в игровую организацию") +
       `<div class="card"><form onsubmit="sendAppeal(event)">
@@ -230,9 +239,9 @@ async function login(e) {
   e.preventDefault();
   const email = document.getElementById("loginEmail").value.trim();
   const password = document.getElementById("loginPassword").value;
-  const { error } = await sbClient.auth.signInWithPassword({email,password});
-  if (error) { alert("Не удалось войти: " + error.message); return; }
-  const { data: u } = await sbClient.auth.getUser();
+  const {error} = await sbClient.auth.signInWithPassword({email,password});
+  if (error) {alert("Не удалось войти: " + error.message); return;}
+  const {data: u} = await sbClient.auth.getUser();
   currentUser = u.user;
   await checkStaff();
   render();
@@ -251,16 +260,16 @@ async function add(e,type) {
   if (type === "documents") obj = {title:v(0),category:v(1),file_url:v(2) || null,description:v(3),published:true};
   if (type === "news") obj = {title:v(0),content:v(1),published:true};
   if (type === "departments") obj = {name:v(0),description:v(1),published:true};
-  const { error } = await sbClient.from(type).insert(obj);
-  if (error) { alert("Ошибка сохранения: " + error.message); return; }
+  const {error} = await sbClient.from(type).insert(obj);
+  if (error) {alert("Ошибка сохранения: " + error.message); return;}
   e.target.reset();
   await loadData();
   if (page === "admin") admin();
 }
 async function removeItem(type,id) {
   if (!confirm("Удалить запись?")) return;
-  const { error } = await sbClient.from(type).delete().eq("id",id);
-  if (error) { alert("Ошибка удаления: " + error.message); return; }
+  const {error} = await sbClient.from(type).delete().eq("id",id);
+  if (error) {alert("Ошибка удаления: " + error.message); return;}
   await loadData();
 }
 async function sendAppeal(e) {
@@ -272,7 +281,7 @@ async function sendAppeal(e) {
     message:document.getElementById("aText").value.trim(),
     status:"new"
   };
-  const { error } = await sbClient.from("appeals").insert(payload);
+  const {error} = await sbClient.from("appeals").insert(payload);
   const result = document.getElementById("appealResult");
   if (error) {
     result.innerHTML = `<div class="notice">Не удалось отправить обращение: ${esc(error.message)}</div>`;
@@ -284,11 +293,11 @@ async function sendAppeal(e) {
 async function loadAppeals() {
   const target = document.getElementById("appealsList");
   if (!target || !logged) return;
-  const { data: items, error } = await sbClient.from("appeals")
+  const {data: items, error} = await sbClient.from("appeals")
     .select("id,full_name,email,subject,message,status,created_at")
     .order("created_at",{ascending:false}).limit(30);
-  if (error) { target.innerHTML = `<div class="notice">Не удалось загрузить обращения: ${esc(error.message)}</div>`; return; }
-  if (!items?.length) { target.innerHTML = `<div class="empty">Обращений пока нет.</div>`; return; }
+  if (error) {target.innerHTML = `<div class="notice">Не удалось загрузить обращения: ${esc(error.message)}</div>`; return;}
+  if (!items?.length) {target.innerHTML = `<div class="empty">Обращений пока нет.</div>`; return;}
   target.innerHTML = items.map(a => `<div class="list-item"><div><b>${esc(a.subject)}</b>
     <div class="sub">${esc(a.full_name)} · ${esc(a.email || "Без email")} · ${esc(a.status)}</div>
     <p>${esc(a.message)}</p></div></div>`).join("");
@@ -297,6 +306,6 @@ init().catch(err => {
   console.error(err);
   content.innerHTML = `<div class="notice"><b>Не удалось подключить сайт к Supabase.</b><br>${esc(err?.message || "Проверьте настройки подключения и обновите страницу.")}</div>`;
 });
-
 </script>
-</body></html>
+</body>
+</html>
