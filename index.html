@@ -62,7 +62,6 @@ textarea{min-height:100px;resize:vertical}
    <button type="button" data-page="documents">Документы</button>
    <button type="button" data-page="news">Новости</button>
    <button type="button" data-page="contact">Обращения</button>
-   <button type="button" data-page="admin">Админ-панель</button>
   </nav>
  </div>
 </header>
@@ -77,8 +76,6 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_skptQdKqe5bGoK7m4lsJJQ_5LnzWyUe
 const defaults = {lawyers: [], departments: [], documents: [], news: []};
 let data = {...defaults};
 let page = "home";
-let logged = false;
-let currentUser = null;
 let sbClient = null;
 const content = document.getElementById("content");
 const hero = document.getElementById("hero");
@@ -106,21 +103,7 @@ function showConfigWarning() {
 async function init() {
   if (showConfigWarning()) return;
   sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  const {data: authData} = await sbClient.auth.getSession();
-  currentUser = authData?.session?.user || null;
-  if (currentUser) await checkStaff();
   await loadData();
-  sbClient.auth.onAuthStateChange(async (_event, session) => {
-    currentUser = session?.user || null;
-    logged = false;
-    if (currentUser) await checkStaff();
-    if (page === "admin") render();
-  });
-}
-async function checkStaff() {
-  if (!currentUser) {logged = false; return;}
-  const {data: roles, error} = await sbClient.from("user_roles").select("role").eq("user_id", currentUser.id);
-  logged = !error && Array.isArray(roles) && roles.some(x => x.role === "admin" || x.role === "editor");
 }
 async function loadData() {
   if (!sbClient) return;
@@ -199,81 +182,6 @@ function render() {
         </a>
       </div>`;
   }
-  if (page === "admin") admin();
-}
-function admin() {
-  if (!currentUser) {
-    content.innerHTML = heading("Административная панель","Вход для уполномоченных сотрудников") +
-      `<div class="card" style="max-width:440px"><h3>Вход администратора</h3>
-      <form onsubmit="login(event)"><label>Email</label><input id="loginEmail" type="email" required placeholder="Адрес электронной почты">
-      <label>Пароль</label><input id="loginPassword" type="password" required placeholder="Пароль Supabase">
-      <button class="primary">Войти</button></form><p class="sub">Используйте пользователя, созданного в Supabase → Authentication → Users.</p></div>`;
-    return;
-  }
-  if (!logged) {
-    content.innerHTML = heading("Доступ не предоставлен","Пользователь вошёл, но не имеет роли администратора.") +
-      `<div class="notice">Добавьте роль <b>admin</b> для этого пользователя в таблице <b>user_roles</b> в Supabase.</div>
-      <button class="outline" onclick="logout()">Выйти</button>`;
-    return;
-  }
-  content.innerHTML = heading("Административная панель","Управление содержимым публичного портала") +
-    `<div class="adminbar"><b>Вы вошли как ${esc(currentUser.email || "администратор")}</b><button class="outline" onclick="logout()">Выйти</button></div>
-    <div class="grid">
-      <div class="card"><h3>Добавить адвоката</h3><form onsubmit="add(event,'lawyers')">
-        <label>Имя и фамилия</label><input id="f0" required><label>Должность</label><input id="f1" required>
-        <label>Подразделение</label><input id="f2"><label>Статус</label><input id="f3" value="Действующий адвокат">
-        <label>Примечание</label><input id="f4"><button class="primary">Добавить</button></form></div>
-      <div class="card"><h3>Добавить документ</h3><form onsubmit="add(event,'documents')">
-        <label>Название</label><input id="f0" required><label>Категория</label><input id="f1">
-        <label>Ссылка на файл (необязательно)</label><input id="f2" type="url"><label>Описание</label><input id="f3">
-        <button class="primary">Добавить</button></form></div>
-      <div class="card"><h3>Добавить новость</h3><form onsubmit="add(event,'news')">
-        <label>Заголовок</label><input id="f0" required><label>Текст новости</label><textarea id="f1" required></textarea>
-        <button class="primary">Опубликовать</button></form></div>
-      <div class="card"><h3>Добавить подразделение</h3><form onsubmit="add(event,'departments')">
-        <label>Название</label><input id="f0" required><label>Описание</label><textarea id="f1"></textarea>
-        <button class="primary">Добавить</button></form></div>
-    </div>
-    <div class="notice"><b>Вход защищён Supabase Auth.</b> Изменения сохраняются в общей базе данных. Доступ к операциям контролируется политиками RLS.</div>
-    <h3>Последние обращения граждан</h3><div id="appealsList" class="list">Загрузка…</div>`;
-  loadAppeals();
-}
-async function login(e) {
-  e.preventDefault();
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
-  const {error} = await sbClient.auth.signInWithPassword({email,password});
-  if (error) {alert("Не удалось войти: " + error.message); return;}
-  const {data: u} = await sbClient.auth.getUser();
-  currentUser = u.user;
-  await checkStaff();
-  render();
-}
-async function logout() {
-  await sbClient.auth.signOut();
-  currentUser = null; logged = false; render();
-}
-async function add(e,type) {
-  e.preventDefault();
-  const form = e.currentTarget;
-  const fields = [...form.querySelectorAll("input, textarea, select")];
-  const v = index => fields[index]?.value?.trim() || "";
-  let obj;
-  if (type === "lawyers") obj = {full_name:v(0),position:v(1),department:v(2),status:v(3) || "Действующий адвокат",description:v(4)};
-  if (type === "documents") obj = {title:v(0),category:v(1),file_url:v(2) || null,description:v(3),published:true};
-  if (type === "news") obj = {title:v(0),content:v(1),published:true};
-  if (type === "departments") obj = {name:v(0),description:v(1),published:true};
-  const {error} = await sbClient.from(type).insert(obj);
-  if (error) {alert("Ошибка сохранения: " + error.message); return;}
-  e.target.reset();
-  await loadData();
-  if (page === "admin") admin();
-}
-async function removeItem(type,id) {
-  if (!confirm("Удалить запись?")) return;
-  const {error} = await sbClient.from(type).delete().eq("id",id);
-  if (error) {alert("Ошибка удаления: " + error.message); return;}
-  await loadData();
 }
 async function sendAppeal(e) {
   e.preventDefault();
@@ -292,18 +200,6 @@ async function sendAppeal(e) {
   }
   e.target.reset();
   result.innerHTML = `<div class="notice"><b>Обращение принято.</b><br>Оно сохранено в базе данных Адвокатской палаты РФО.</div>`;
-}
-async function loadAppeals() {
-  const target = document.getElementById("appealsList");
-  if (!target || !logged) return;
-  const {data: items, error} = await sbClient.from("appeals")
-    .select("id,full_name,email,subject,message,status,created_at")
-    .order("created_at",{ascending:false}).limit(30);
-  if (error) {target.innerHTML = `<div class="notice">Не удалось загрузить обращения: ${esc(error.message)}</div>`; return;}
-  if (!items?.length) {target.innerHTML = `<div class="empty">Обращений пока нет.</div>`; return;}
-  target.innerHTML = items.map(a => `<div class="list-item"><div><b>${esc(a.subject)}</b>
-    <div class="sub">${esc(a.full_name)} · ${esc(a.email || "Без email")} · ${esc(a.status)}</div>
-    <p>${esc(a.message)}</p></div></div>`).join("");
 }
 init().catch(err => {
   console.error(err);
