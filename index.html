@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -15,7 +15,7 @@ header{background:linear-gradient(120deg,#0c1b2e,#1b3a59);color:#fff;border-bott
 .brand b{display:block;letter-spacing:1.2px;font-size:17px}
 .brand span{color:#d9c79f;font-size:12px;letter-spacing:1px}
 nav{display:flex;gap:5px;flex-wrap:wrap;padding:0 0 16px}
-nav button,nav a,.btn{border:1px solid transparent;background:transparent;color:#e9eef4;padding:10px 13px;border-radius:4px;cursor:pointer;font-size:14px;text-decoration:none;font-family:inherit;display:inline-flex;align-items:center}
+nav button,nav a,.btn{display:inline-flex;align-items:center;text-decoration:none;border:1px solid transparent;background:transparent;color:#e9eef4;padding:10px 13px;border-radius:4px;cursor:pointer;font-size:14px;font-family:inherit}
 nav button:hover,nav button.active,nav a:hover{background:#ffffff18;border-color:#ffffff35;color:#fff}
 .hero{background:linear-gradient(90deg,#10233bee,#10233b9c),radial-gradient(circle at 80% 30%,#526b80,#10233b);color:white;padding:56px 0}
 .eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:bold}
@@ -186,15 +186,18 @@ function render() {
       <a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a></div>`;
   }
   if (page === "contact") {
-    content.innerHTML = heading("Обращения граждан","Форма для направления обращения в игровую организацию") +
-      `<div class="card"><form onsubmit="sendAppeal(event)">
-        <label>Ваше игровое имя</label><input required id="aName" placeholder="Имя Фамилия">
-        <label>Электронная почта</label><input id="aEmail" type="email" required placeholder="example@mail.com">
-        <label>Тема обращения</label><input required id="aSubject" placeholder="Краткая тема">
-        <label>Текст обращения</label><textarea required id="aText" placeholder="Опишите суть обращения"></textarea>
-        <button class="primary">Отправить обращение</button>
-        <p class="sub">Обращение будет сохранено в базе данных палаты.</p>
-      </form><div id="appealResult"></div></div>`;
+    content.innerHTML = heading("Обращения","Направление обращений в Адвокатскую палату РФО") +
+      `<div class="card">
+        <div class="symbol">✉</div>
+        <h3>Обращение в Адвокатскую палату РФО</h3>
+        <p>Для подачи заявления, жалобы или иного обращения воспользуйтесь официальной электронной формой.</p>
+        <a class="primary"
+           href="https://docs.google.com/forms/d/e/1FAIpQLSeoBvN9X28EN43S0xXldr6AfPZs5Qh2fs9MBxjgjd2ty_xSLw/viewform?usp=sharing&ouid=106890388294555027477"
+           target="_blank"
+           rel="noopener noreferrer">
+          Подать обращение
+        </a>
+      </div>`;
   }
   if (page === "admin") admin();
 }
