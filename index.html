@@ -20,7 +20,7 @@ nav button:hover,nav button.active,nav a:hover{background:#ffffff18;border-color
 .hero{background:linear-gradient(90deg,#10233bee,#10233b9c),radial-gradient(circle at 80% 30%,#526b80,#10233b);color:white;padding:56px 0}
 .eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:bold}
 h1{font-family:Georgia,serif;font-size:clamp(30px,5vw,48px);line-height:1.15;margin:12px 0}
-.hero p{max-width:650px;color:#dbe3ec;font-size:17px}
+.hero p{max-width:760px;color:#dbe3ec;font-size:17px}
 .goldline{width:76px;height:3px;background:var(--gold);margin:22px 0}
 main{padding:34px 0 60px;min-height:55vh}
 .section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:20px}
@@ -45,8 +45,9 @@ label{font-size:13px;font-weight:bold;color:#344357}
 textarea{min-height:100px;resize:vertical}
 .formrow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .hidden{display:none!important}
-.adminbar{background:#e9eef3;border:1px solid #d2dbe4;padding:14px;border-radius:6px;margin-bottom:18px;display:flex;justify-content:space-between;gap:10px;align-items:center}
 .empty{padding:30px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #cbd4dd;border-radius:6px}
+.review-stars{color:#a98232;letter-spacing:2px;font-size:18px}
+.review-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:7px}
 @media(max-width:760px){.grid{grid-template-columns:1fr}.top{align-items:flex-start}.formrow{grid-template-columns:1fr}.hero{padding:42px 0}.section-head{align-items:flex-start;flex-direction:column}.list-item{align-items:flex-start;flex-direction:column}nav{gap:4px}nav button,nav a{padding:9px 10px}}
 </style>
 </head>
@@ -59,21 +60,19 @@ textarea{min-height:100px;resize:vertical}
    <button type="button" data-page="leadership">Руководство</button>
    <a href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Реестр адвокатов</a>
    <button type="button" data-page="departments">Подразделения</button>
-   <button type="button" data-page="documents">Документы</button>
    <button type="button" data-page="news">Новости</button>
    <button type="button" data-page="contact">Обращения</button>
   </nav>
  </div>
 </header>
-<section class="hero" id="hero"><div class="wrap"><div class="eyebrow">Официальный информационный портал</div><h1>Законность.<br>Справедливость. Защита.</h1><div class="goldline"></div><p>Профессиональная юридическая помощь, защита прав и законных интересов граждан в рамках игрового мира RMRP.</p></div></section>
+<section class="hero" id="hero"><div class="wrap"><div class="eyebrow">Официальный информационный портал</div><h1>Законность.<br>Справедливость. Защита.</h1><div class="goldline"></div><p>Профессиональная юридическая помощь, защита прав и законных интересов граждан в рамках игрового мира.</p></div></section>
 <main class="wrap"><div id="content"></div></main>
 <footer><div class="wrap"><strong>Адвокатская палата Рублевского федерального округа</strong><br>Информационный портал игрового проекта RMRP. Все сведения и документы на сайте являются игровыми.</div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://iokashgaqmbrbyltnawg.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_skptQdKqe5bGoK7m4lsJJQ_5LnzWyUe";
-
-const defaults = {lawyers: [], departments: [], documents: [], news: []};
+const defaults = {lawyers: [], departments: [], news: []};
 let data = {...defaults};
 let page = "home";
 let sbClient = null;
@@ -106,11 +105,9 @@ async function init() {
   await loadData();
 }
 async function loadData() {
-  if (!sbClient) return;
   const specs = [
     ["lawyers", "id,full_name,position,department,status,description,created_at"],
     ["departments", "id,name,description,published,created_at"],
-    ["documents", "id,title,category,file_url,description,published,created_at"],
     ["news", "id,title,content,published,created_at"]
   ];
   for (const [table, fields] of specs) {
@@ -118,7 +115,6 @@ async function loadData() {
     if (!error && rows) data[table] = rows.map(row => {
       if (table === "lawyers") return {...row, name:row.full_name, role:row.position, desc:row.description};
       if (table === "departments") return {...row, desc:row.description};
-      if (table === "documents") return {...row, kind:row.category, desc:row.description};
       return {...row, date:row.created_at ? new Date(row.created_at).toLocaleDateString("ru-RU") : "", desc:row.content};
     });
   }
@@ -129,11 +125,11 @@ function heading(title, sub) {
 }
 function cards(items, icon) {
   if (!items.length) return `<div class="empty">Пока нет опубликованных записей.</div>`;
-  return `<div class="grid">${items.map(x => `<article class="card"><div class="symbol">${icon}</div><h3>${esc(x.name || x.title)}</h3><p>${esc(x.role || x.desc || x.kind || "")}</p></article>`).join("")}</div>`;
+  return `<div class="grid">${items.map(x => `<article class="card"><div class="symbol">${icon}</div><h3>${esc(x.name || x.title)}</h3><p>${esc(x.role || x.desc || "")}</p></article>`).join("")}</div>`;
 }
-function rows(items, type) {
+function rows(items) {
   if (!items.length) return `<div class="empty">Пока нет опубликованных записей.</div>`;
-  return `<div class="list">${items.map(x => `<div class="list-item"><div><b>${esc(x.title || x.name)}</b><div class="sub">${esc(x.role || x.kind || x.date || x.category || "")}</div><div>${esc(x.desc || "")}</div>${x.file_url ? `<p><a href="${esc(x.file_url)}" target="_blank" rel="noopener">Открыть документ</a></p>` : ""}</div>${logged && x.id ? `<button class="outline" onclick="removeItem('${type}','${x.id}')">Удалить</button>` : ""}</div>`).join("")}</div>`;
+  return `<div class="list">${items.map(x => `<div class="list-item"><div><b>${esc(x.title || x.name)}</b><div class="sub">${esc(x.role || x.date || "")}</div><div>${esc(x.desc || "")}</div></div></div>`).join("")}</div>`;
 }
 function show(p) {
   page = p;
@@ -149,57 +145,24 @@ function render() {
   if (page === "home") {
     content.innerHTML = `${heading("Добро пожаловать","Официальная информация палаты")}
       <div class="grid">
-        <div class="card"><div class="symbol">⚖</div><h3>Защита и представительство</h3><p>Оказание правовой помощи участникам игрового процесса.</p></div>
-        <div class="card"><div class="symbol">§</div><h3>Нормативная база</h3><p>Внутренние документы, положения и опубликованные правила.</p></div>
+        <div class="card"><div class="symbol">⚖</div><h3>Защита и представительство</h3><p>Профессиональная юридическая помощь и защита прав участников игрового процесса.</p></div>
         <div class="card"><div class="symbol">♙</div><h3>Реестр адвокатов</h3><p>Информация о составе и статусе адвокатского сообщества.</p><a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр</a></div>
       </div>
       <div class="notice"><b>Официальное уведомление</b><br>Портал содержит игровую информацию Адвокатской палаты РФО.</div>
-      ${heading("Последние новости","Объявления и события")}${rows(data.news.slice(0,3),"news")}`;
+      ${heading("Последние новости","Объявления и события")}${rows(data.news.slice(0,3))}`;
   }
-  if (page === "leadership") {
-    content.innerHTML = heading("Руководство палаты","Органы управления и ответственные лица") +
-      cards(data.lawyers.filter(x => /председател|заместител|руководител/i.test(x.role || "")), "♙");
-  }
+  if (page === "leadership") content.innerHTML = heading("Руководство палаты","Органы управления и ответственные лица") + cards(data.lawyers.filter(x => /председател|заместител|руководител/i.test(x.role || "")), "♙");
   if (page === "departments") content.innerHTML = heading("Структура и подразделения","Организация внутренней работы палаты") + cards(data.departments,"▦");
-  if (page === "documents") content.innerHTML = heading("Документы","Нормативные и внутренние документы палаты") + rows(data.documents,"documents");
-  if (page === "news") content.innerHTML = heading("Новости и объявления","Официальные публикации палаты") + rows(data.news,"news");
+  if (page === "news") content.innerHTML = heading("Новости и объявления","Официальные публикации палаты") + rows(data.news);
   if (page === "lawyers") {
     content.innerHTML = heading("Реестр адвокатов","Официальный реестр адвокатской палаты") +
-      `<div class="card"><h3>Реестр адвокатов РФО</h3><p>Актуальный список адвокатов размещён в официальной таблице реестра.</p>
-      <a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a></div>`;
+      `<div class="card"><h3>Реестр адвокатов РФО</h3><p>Актуальный список адвокатов размещён в официальной таблице реестра.</p><a class="primary" href="https://docs.google.com/spreadsheets/d/1AqnmGxqgq7pjGMKwrqtfzWFF8Vu2fWU_/edit?gid=597604517#gid=597604517" target="_blank" rel="noopener noreferrer">Открыть реестр адвокатов</a></div>`;
   }
   if (page === "contact") {
     content.innerHTML = heading("Обращения","Направление обращений в Адвокатскую палату РФО") +
-      `<div class="card">
-        <div class="symbol">✉</div>
-        <h3>Обращение в Адвокатскую палату РФО</h3>
-        <p>Для подачи заявления, жалобы или иного обращения воспользуйтесь официальной электронной формой.</p>
-        <a class="primary"
-           href="https://docs.google.com/forms/d/e/1FAIpQLSeoBvN9X28EN43S0xXldr6AfPZs5Qh2fs9MBxjgjd2ty_xSLw/viewform?usp=sharing&ouid=106890388294555027477"
-           target="_blank"
-           rel="noopener noreferrer">
-          Подать обращение
-        </a>
-      </div>`;
+      `<div class="card"><div class="symbol">✉</div><h3>Обращение в Адвокатскую палату РФО</h3><p>Для подачи заявления, жалобы или иного обращения воспользуйтесь официальной электронной формой.</p>
+      <a class="primary" href="https://docs.google.com/forms/d/e/1FAIpQLSeoBvN9X28EN43S0xXldr6AfPZs5Qh2fs9MBxjgjd2ty_xSLw/viewform?usp=sharing&ouid=106890388294555027477" target="_blank" rel="noopener noreferrer">Подать обращение</a></div>`;
   }
-}
-async function sendAppeal(e) {
-  e.preventDefault();
-  const payload = {
-    full_name:document.getElementById("aName").value.trim(),
-    email:document.getElementById("aEmail").value.trim() || null,
-    subject:document.getElementById("aSubject").value.trim(),
-    message:document.getElementById("aText").value.trim(),
-    status:"new"
-  };
-  const {error} = await sbClient.from("appeals").insert(payload);
-  const result = document.getElementById("appealResult");
-  if (error) {
-    result.innerHTML = `<div class="notice">Не удалось отправить обращение: ${esc(error.message)}</div>`;
-    return;
-  }
-  e.target.reset();
-  result.innerHTML = `<div class="notice"><b>Обращение принято.</b><br>Оно сохранено в базе данных Адвокатской палаты РФО.</div>`;
 }
 init().catch(err => {
   console.error(err);
